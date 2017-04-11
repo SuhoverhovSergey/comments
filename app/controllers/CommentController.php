@@ -85,4 +85,27 @@ class CommentController extends Controller
 
         echo json_encode($result);
     }
+
+    public function getChildNodes()
+    {
+        $id = $_POST['id'] ?? 0;
+
+        $result = [
+            'success' => false,
+        ];
+
+        /** @var Comment $commentModel */
+        $commentModel = $this->model(Comment::class);
+        $comment = $commentModel->getById($id);
+
+        if ($comment) {
+            $nodes = $commentModel->getChildNodes($comment);
+            $result['success'] = true;
+            $result['data']['nodes'] = $nodes;
+        } else {
+            $result['message'] = 'Не удалось получить список комментариев';
+        }
+
+        echo json_encode($result);
+    }
 }

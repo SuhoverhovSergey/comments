@@ -164,4 +164,59 @@ $(document).ready(function () {
 
         return false;
     });
+
+    $('body').on('click', 'li > a.toggle', function () {
+        var link = $(this);
+        var li = link.parent();
+        var id = li.data('id');
+
+        $.ajax({
+            type: 'post',
+            dataType: 'json',
+            url: "/comment/getChildNodes",
+            data: {
+                id: id
+            },
+            success: function(result) {
+                if (result.success) {
+                    li.children('ul').remove();
+
+                    var nodes = result.data.nodes;
+
+                    var prevLevel = 1;
+                    var parentLi = li;
+                    var lastLi = li;
+                    for (var key in nodes) {
+                        var node = nodes[key];
+                        var nextLevel = parseInt(node.level);
+
+                        if ((nextLevel - prevLevel) > 0) {
+                            var ul = lastLi.find('ul[data-level="' + node.level + '"]:last');
+                            if (!ul.length) {
+                                ul = $('<ul data-level="' + node.level + '"></ul>');
+                                lastLi.append(ul);
+                            }
+                            lastLi = $(getCommentTemplate(node.id, node.text));
+                            ul.append(lastLi);
+                            prevLevel = parseInt(node.level);
+                        } else if ((nextLevel - prevLevel) == 0) {
+                            var ul = lastLi.parent();
+                            lastLi = $(getCommentTemplate(node.id, node.text));
+                            ul.append(lastLi);
+                            prevLevel = parseInt(node.level);
+                        } else {
+                            var ul = parentLi.find('ul[data-level="' + node.level + '"]:last');
+                            lastLi = $(getCommentTemplate(node.id, node.text));
+                            ul.append(lastLi);
+                            prevLevel = parseInt(node.level);
+                        }
+                    }
+                } else {
+                    alert(result.message);
+                }
+            }
+        });
+
+        return false;
+    });
 });

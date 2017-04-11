@@ -10,6 +10,7 @@ $comments = $data['comments'] ?? [];
 <ul class="comments">
 <?php foreach ($comments as $comment) { ?>
     <li data-id="<?php echo $comment->id ?>">
+        <a href="#" class="toggle" style="text-decoration: none">+</a>
         <span><?php echo $comment->text ?></span>
         <br>
         <a href="#" class="add">Ответить</a>

@@ -146,4 +146,11 @@ class Comment extends Model
 
         return true;
     }
+
+    public function getChildNodes(Comment $comment)
+    {
+        $pdoStatement = $this->pdo->prepare("SELECT id, text, level FROM {$this::$tableName} WHERE left_key > :left_key AND right_key < :right_key ORDER BY left_key");
+        $pdoStatement->execute([':left_key' => $comment->left_key, ':right_key' => $comment->right_key]);
+        return $pdoStatement->fetchAll(PDO::FETCH_CLASS, self::class, [$this->pdo]);
+    }
 }
