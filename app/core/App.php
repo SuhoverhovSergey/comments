@@ -42,7 +42,7 @@ class App
         }
 
         $url = $this->parseUrl();
-        $controllerName = ucfirst($url[0] ?? '') . self::CONTROLLER_POSTFIX_NAME;
+        $controllerName = ucfirst($url[0] ?? '') . static::CONTROLLER_POSTFIX_NAME;
         if (file_exists(__DIR__ . '/../controllers/' . $controllerName . '.php')) {
             $this->controller = $controllerName;
             unset($url[0]);
