@@ -77,6 +77,9 @@ $comments = $data['comments'] ?? [];
 
                             ul.append(getCommentTemplate(result.data.id, result.data.text));
                         } else {
+                            if (!$('ul.comments').length) {
+                                $('body').prepend('<ul class="comments"></ul>');
+                            }
                             $('ul.comments').append(getCommentTemplate(result.data.id, result.data.text));
                         }
                         success();
@@ -158,6 +161,34 @@ $comments = $data['comments'] ?? [];
 
             createComment(parentId, text, function () {
                 textarea.val('');
+            });
+
+            return false;
+        });
+
+        $('body').on('click', 'li > a.delete', function () {
+            var link = $(this);
+            var li = link.parent();
+            var id = li.data('id');
+
+            $.ajax({
+                type: 'post',
+                dataType: 'json',
+                url: "/comment/delete",
+                data: {
+                    id: id
+                },
+                success: function(result) {
+                    if (result.success) {
+                        var ul = li.parent();
+                        li.remove();
+                        if (!ul.children('li').length) {
+                            ul.remove();
+                        }
+                    } else {
+                        alert(result.message);
+                    }
+                }
             });
 
             return false;

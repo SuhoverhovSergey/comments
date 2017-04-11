@@ -64,4 +64,25 @@ class CommentController extends Controller
 
         echo json_encode($result);
     }
+
+    public function delete()
+    {
+        $id = $_POST['id'] ?? 0;
+
+        $result = [
+            'success' => false,
+        ];
+
+        /** @var Comment $commentModel */
+        $commentModel = $this->model(Comment::class);
+        $comment = $commentModel->getById($id);
+
+        if ($comment && $commentModel->delete($comment)) {
+            $result['success'] = true;
+        } else {
+            $result['message'] = 'Не удалось удалить комментарий';
+        }
+
+        echo json_encode($result);
+    }
 }

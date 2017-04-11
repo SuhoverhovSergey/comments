@@ -119,4 +119,31 @@ class Comment extends Model
         }
         return false;
     }
+
+    /**
+     * @param Comment $comment
+     * @return bool
+     */
+    public function delete(Comment $comment)
+    {
+        $pdo = $this->pdo;
+        $pdo->beginTransaction();
+
+        try {
+            $pdoStatement = $pdo->prepare("DELETE FROM {$this::$tableName} WHERE left_key >= :left_key AND right_key <= :right_key");
+            $pdoStatement->execute([':left_key' => $comment->left_key, ':right_key' => $comment->right_key]);
+
+            $pdoStatement = $pdo->prepare("UPDATE {$this::$tableName} SET
+                left_key = IF(left_key > :left_key, left_key – (:right_key - :left_key + 1), left_key),
+                right_key = right_key – (:right_key - :left_key + 1)
+                WHERE right_key > :right_key");
+            $pdoStatement->execute([':left_key' => $comment->left_key, ':right_key' => $comment->right_key]);
+
+            $pdo->commit();
+        } catch (Exception $e) {
+            $pdo->rollBack();
+        }
+
+        return true;
+    }
 }
