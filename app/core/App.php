@@ -2,11 +2,13 @@
 
 class App
 {
+    const CONTROLLER_POSTFIX_NAME = 'Controller';
+
     /**
      * Контроллер по умолчанию.
      * @var string
      */
-    protected $controller = "home";
+    protected $controller = "HomeController";
 
     /**
      * Метод по умолчанию.
@@ -40,8 +42,9 @@ class App
         }
 
         $url = $this->parseUrl();
-        if (file_exists(__DIR__ . '/../controllers/' . $url[0] . '.php')) {
-            $this->controller = $url[0];
+        $controllerName = ucfirst($url[0] ?? '') . self::CONTROLLER_POSTFIX_NAME;
+        if (file_exists(__DIR__ . '/../controllers/' . $controllerName . '.php')) {
+            $this->controller = $controllerName;
             unset($url[0]);
         }
 
