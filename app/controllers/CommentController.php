@@ -37,4 +37,31 @@ class CommentController extends Controller
 
         echo json_encode($result);
     }
+
+    public function update()
+    {
+        $id = $_POST['id'] ?? 0;
+        $text = $_POST['text'] ?? '';
+
+        $result = [
+            'success' => false,
+        ];
+
+        /** @var Comment $commentModel */
+        $commentModel = $this->model(Comment::class);
+        $comment = $commentModel->getById($id);
+
+        if ($text) {
+            if ($comment && $comment = $commentModel->updateText($text, $comment)) {
+                $result['success'] = true;
+                $result['data'] = ['id' => $comment->id, 'text' => $comment->text];
+            } else {
+                $result['message'] = 'Не удалось обновить комментарий';
+            }
+        } else {
+            $result['message'] = 'Введите текст коментария';
+        }
+
+        echo json_encode($result);
+    }
 }

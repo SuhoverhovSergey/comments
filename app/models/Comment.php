@@ -64,7 +64,7 @@ class Comment extends Model
     /**
      * @param $text
      * @param Comment|null $parentComment
-     * @return null|Comment
+     * @return false|Comment
      */
     public function add($text, $parentComment = null)
     {
@@ -101,6 +101,22 @@ class Comment extends Model
             $pdo->rollBack();
         }
 
-        return $newId ? $this->getById($newId) : null;
+        return $newId ? $this->getById($newId) : false;
+    }
+
+    /**
+     * @param $text
+     * @param Comment $comment
+     * @return Comment|false
+     */
+    public function updateText($text, Comment $comment)
+    {
+        $text = htmlentities($text, ENT_QUOTES, "UTF-8");
+        $pdoStatement = $this->pdo->prepare("UPDATE {$this::$tableName} SET text = :text WHERE id = :id");
+        if ($pdoStatement->execute([':text' => $text, ':id' => $comment->id])) {
+            $comment->text = $text;
+            return $comment;
+        }
+        return false;
     }
 }

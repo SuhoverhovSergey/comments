@@ -28,10 +28,14 @@ $comments = $data['comments'] ?? [];
 <script src="/js/jquery-3.2.1.min.js"></script>
 <script>
     $(document).ready(function () {
-        function addForm(link, li) {
+        function addForm(link, li, buttonClickCallback) {
             var form = $('<form><textarea></textarea><br></form>');
             var button = $('<button>Отправить</button>');
             var cancel = $('<a href="#" style="margin-left: 10px;">Отмена</a>');
+
+            if (link.hasClass('edit')) {
+                form.children('textarea').val(li.children('span').text());
+            }
 
             form.append(button);
             form.append(cancel);
@@ -40,14 +44,7 @@ $comments = $data['comments'] ?? [];
             link.hide();
 
             button.on('click', function () {
-                var text = form.find('textarea').val();
-                var parentId = li.data('id');
-
-                sendComment(parentId, text, function () {
-                    link.show();
-                    form.remove();
-                });
-
+                buttonClickCallback(form, li);
                 return false;
             });
 
@@ -58,7 +55,7 @@ $comments = $data['comments'] ?? [];
             });
         }
 
-        function sendComment(parentId, text, success) {
+        function createComment(parentId, text, success) {
             $.ajax({
                 type: 'post',
                 dataType: 'json',
@@ -90,6 +87,27 @@ $comments = $data['comments'] ?? [];
             });
         }
 
+        function updateComment(id, text, success) {
+            $.ajax({
+                type: 'post',
+                dataType: 'json',
+                url: "/comment/update",
+                data: {
+                    id: id,
+                    text: text
+                },
+                success: function(result) {
+                    if (result.success) {
+                        var li = $('li[data-id="' + id + '"]');
+                        li.children('span').text(result.data.text);
+                        success();
+                    } else {
+                        alert(result.message);
+                    }
+                }
+            });
+        }
+
         function getCommentTemplate(id, text) {
             return '<li data-id="' + id + '">' +
                 '<span>' + text + '</span><br>' +
@@ -101,7 +119,34 @@ $comments = $data['comments'] ?? [];
         $('body').on('click', 'li > a.add', function() {
             var link = $(this);
             var li = link.parent();
-            addForm(link, li);
+            addForm(link, li, function (form, li) {
+                var text = form.find('textarea').val();
+                var parentId = li.data('id');
+
+                createComment(parentId, text, function () {
+                    link.show();
+                    form.remove();
+                });
+
+                return false;
+            });
+            return false;
+        });
+
+        $('body').on('click', 'li > a.edit', function() {
+            var link = $(this);
+            var li = link.parent();
+            addForm(link, li, function (form, li) {
+                var text = form.find('textarea').val();
+                var id = li.data('id');
+
+                updateComment(id, text, function () {
+                    link.show();
+                    form.remove();
+                });
+
+                return false;
+            });
             return false;
         });
 
@@ -111,7 +156,7 @@ $comments = $data['comments'] ?? [];
             var text = textarea.val();
             var parentId = 0;
 
-            sendComment(parentId, text, function () {
+            createComment(parentId, text, function () {
                 textarea.val('');
             });
 
