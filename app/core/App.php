@@ -2,8 +2,22 @@
 
 class App
 {
+    /**
+     * Контроллер по умолчанию.
+     * @var string
+     */
     protected $controller = "home";
+
+    /**
+     * Метод по умолчанию.
+     * @var mixed|string
+     */
     protected $method = "index";
+
+    /**
+     * Параметры, которые передаются в метод контроллера.
+     * @var array
+     */
     protected $params = [];
 
     /**
@@ -11,6 +25,10 @@ class App
      */
     protected $pdo;
 
+    /**
+     * App constructor.
+     * @param array|null $config
+     */
     public function __construct(array $config = null)
     {
         $dbConfig = $config['db'] ?? [];
@@ -43,6 +61,10 @@ class App
         call_user_func_array([$this->controller, $this->method], $this->params);
     }
 
+    /**
+     * Метод для разбора Url.
+     * @return array
+     */
     public function parseUrl()
     {
         if (isset($_GET['url'])) {
